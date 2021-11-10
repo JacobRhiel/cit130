@@ -58,7 +58,7 @@ public class Inventory {
     public static int getTotalInventoryForProductId(int id) {
         Product product = getProductById(id);
         if(product == null) return 0;
-        return (product.getOnHandQuantity() + product.getOnOrderQuantity()) - product.getQuantitySold();
+        return product.getInventoryQuantity();
     }
 
     /**
@@ -69,7 +69,18 @@ public class Inventory {
     public static float getTotalInventoryValueForProductId(int id) {
         Product product = getProductById(id);
         if(product == null) return 0;
-        return product.getPrice() * (product.getOnHandQuantity() + product.getOnOrderQuantity()) - product.getQuantitySold();
+        return product.getInventoryValue();
+    }
+
+    /**
+     * Checks if the product inventory is too low and should be ordered.
+     * @param id The id of the product.
+     * @return Whether the product requires ordering.
+     */
+    public static boolean shouldOrderProductById(int id) {
+        Product product = getProductById(id);
+        if(product == null) return false;
+        return product.shouldOrderProduct();
     }
 
     /**

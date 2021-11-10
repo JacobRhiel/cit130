@@ -14,6 +14,11 @@ public class Product {
     private int onOrderQuantity;
     private int quantitySold;
 
+    private int inventoryQuantity;
+    private float inventoryValue;
+
+    private boolean shouldOrder = false;
+
     /**
      * Empty constructor for builder object.
      */
@@ -39,6 +44,8 @@ public class Product {
         this.onHandQuantity = onHandQuantity;
         this.onOrderQuantity = onOrderQuantity;
         this.quantitySold = quantitySold;
+        updateTotalQuantity();
+        updateTotalValue();
     }
 
     public int getNumber() {
@@ -79,14 +86,56 @@ public class Product {
 
     public void setOnHandQuantity(int onHandQuantity) {
         this.onHandQuantity = onHandQuantity;
+        updateTotalQuantity();
     }
 
     public void setOnOrderQuantity(int onOrderQuantity) {
         this.onOrderQuantity = onOrderQuantity;
+        updateTotalQuantity();
     }
 
     public void setQuantitySold(int quantitySold) {
         this.quantitySold = quantitySold;
+        updateTotalQuantity();
+    }
+
+    /**
+     * Sets the total quantity of product.
+     */
+    public void updateTotalQuantity() {
+        this.inventoryQuantity = (getOnHandQuantity() + getOnOrderQuantity()) - getQuantitySold();
+    }
+
+    public int getInventoryQuantity() {
+        return this.inventoryQuantity;
+    }
+
+    /**
+     * Sets the total value of product.
+     */
+    public void updateTotalValue() {
+        this.inventoryValue = getPrice() * (getOnHandQuantity() + getOnOrderQuantity()) - getQuantitySold();
+    }
+
+    public float getInventoryValue() {
+        return this.inventoryValue;
+    }
+
+    /**
+     * Synchronization for product values.
+     */
+    public void synchronize() {
+        updateTotalValue();
+        updateTotalQuantity();
+        shouldOrderProduct();
+    }
+
+    /**
+     * Tells whether or not the product should be ordered based on quantity.
+     * @return Whether the product needs to be ordered.
+     */
+    public boolean shouldOrderProduct() {
+        return shouldOrder = getOnHandQuantity() + getOnOrderQuantity() < 50;
     }
 
     @Override
@@ -98,6 +147,9 @@ public class Product {
                 ", onHandQuantity=" + onHandQuantity +
                 ", onOrderQuantity=" + onOrderQuantity +
                 ", quantitySold=" + quantitySold +
+                ", shouldOrder=" + shouldOrder +
+                ", totalValue=" + inventoryValue +
+                ", totalQuantity=" + inventoryQuantity +
                 '}';
     }
 }

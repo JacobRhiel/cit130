@@ -30,7 +30,7 @@ public class InventoryTableModel extends DefaultTableModel {
         this.products = new HashMap<>();
         this.fields = Product.class.getDeclaredFields();
         // find fields reflectively and format the naming from camel case to add spaces in between humps
-        // and capitilze first letter.
+        // and capitalize the first letter.
         for (Field field : fields) {
             String formattedFieldName = field.getName().replaceAll(
                     String.format("%s|%s|%s",
@@ -43,8 +43,6 @@ public class InventoryTableModel extends DefaultTableModel {
             addColumn(formattedFieldName.substring(0, 1).toUpperCase()
                     + formattedFieldName.substring(1));
         }
-        addColumn("Current Inventory");
-        addColumn("Inventory Value");
     }
 
     @Override
@@ -57,42 +55,51 @@ public class InventoryTableModel extends DefaultTableModel {
         Product product = products.get(row);
         // defines values based on field name.
         switch (fields[column].getName()) {
-            case "description" -> {
+            case "description":
                 product.setDescription((String) aValue);
                 super.setValueAt(product.getDescription(), row, column);
-            }
-            case "price" -> {
+                break;
+            case "price":
                 if (!checkValidFloat(aValue)) return;
                 float price = formattedFloat(Float.parseFloat((String) aValue));
                 product.setPrice(price);
+                product.synchronize();
                 super.setValueAt(price, row, column);
-                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, findColumn("Inventory Value"));
-            }
-            case "quantitySold" -> {
+                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, column + 5);
+                break;
+            case "quantitySold":
                 if (!checkValidInt(aValue)) return;
                 int quantitySold = Integer.parseInt((String) aValue);
                 product.setQuantitySold(quantitySold);
+                product.synchronize();
                 super.setValueAt(quantitySold, row, column);
-                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, findColumn("Current Inventory"));
-                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, findColumn("Inventory Value"));
-            }
-            case "onHandQuantity" -> {
+                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, column + 1);
+                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, column + 2);
+                super.setValueAt(Inventory.shouldOrderProductById(product.getNumber()), row, column + 3);
+                break;
+            case "onHandQuantity":
                 if (!checkValidInt(aValue)) return;
                 int onHandQuantity = Integer.parseInt((String) aValue);
                 product.setOnHandQuantity(onHandQuantity);
+                product.synchronize();
                 super.setValueAt(onHandQuantity, row, column);
-                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, findColumn("Current Inventory"));
-                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, findColumn("Inventory Value"));
-            }
-            case "onOrderQuantity" -> {
+                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, column + 3);
+                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, column + 4);
+                super.setValueAt(Inventory.shouldOrderProductById(product.getNumber()), row, column + 5);
+                break;
+            case "onOrderQuantity":
                 if (!checkValidInt(aValue)) return;
                 int onOrderQuantity = Integer.parseInt((String) aValue);
                 product.setOnOrderQuantity(onOrderQuantity);
+                product.synchronize();
                 super.setValueAt(onOrderQuantity, row, column);
-                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, findColumn("Current Inventory"));
-                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, findColumn("Inventory Value"));
-            }
-            default -> super.setValueAt(aValue, row, column);
+                super.setValueAt(Inventory.getTotalInventoryForProductId(product.getNumber()), row, column + 2);
+                super.setValueAt(Inventory.getTotalInventoryValueForProductId(product.getNumber()), row, column + 3);
+                super.setValueAt(Inventory.shouldOrderProductById(product.getNumber()), row, column + 4);
+                break;
+            default:
+                super.setValueAt(aValue, row, column);
+                break;
         }
         // update the overview label.
         InventoryViewerApplication.EXPLORER_PANEL.updateOverviewLabel();
@@ -168,7 +175,9 @@ public class InventoryTableModel extends DefaultTableModel {
         insertRow(row, new Object[] {
                 product.getNumber(), product.getDescription(), product.getPrice(),
                 product.getOnHandQuantity(), product.getOnOrderQuantity(),
-                product.getQuantitySold(), Inventory.getTotalInventoryForProductId(product.getNumber()), 0
+                product.getQuantitySold(), Inventory.getTotalInventoryForProductId(product.getNumber()),
+                Inventory.getTotalInventoryValueForProductId(product.getNumber()),
+                Inventory.shouldOrderProductById(product.getNumber())
         });
     }
 

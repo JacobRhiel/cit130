@@ -168,8 +168,7 @@ public class ConversionPanel extends JPanel implements ActionListener {
             ConversionUnitType secondType = (ConversionUnitType)toSelector.getSelectedItem();
 
             if(fromTextField.getText() == fromLabelDefaultText
-                || fromTextField.getText().isEmpty()
-                || fromTextField.getText().isBlank())
+                || fromTextField.getText().isEmpty())
                 return;
 
             float resultValue = Objects.requireNonNull(firstType).convertUnit(Float.parseFloat(fromTextField.getText()), secondType);

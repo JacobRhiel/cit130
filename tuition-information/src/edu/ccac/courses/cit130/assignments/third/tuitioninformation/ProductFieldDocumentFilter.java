@@ -1,6 +1,4 @@
-package edu.ccac.courses.cit130.assignments.second.inventory.gui.manager.input.filter;
-
-import edu.ccac.courses.cit130.assignments.second.inventory.gui.manager.input.InputType;
+package edu.ccac.courses.cit130.assignments.third.tuitioninformation;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -14,9 +12,11 @@ import java.awt.*;
  */
 public class ProductFieldDocumentFilter extends DocumentFilter {
 
+    private final StudentEntryTextField parent;
     private final InputType type;
 
-    public ProductFieldDocumentFilter(InputType type) {
+    public ProductFieldDocumentFilter(StudentEntryTextField parent, InputType type) {
+        this.parent = parent;
         this.type = type;
     }
 
@@ -25,6 +25,7 @@ public class ProductFieldDocumentFilter extends DocumentFilter {
         text += str;
         if(matchesType(text)) {
             super.replace(fb, offs, length, str, a);
+            CreateStudentPanel.pushTextFieldUpdate(parent);
         } else {
             Toolkit.getDefaultToolkit().beep();
         }
@@ -35,6 +36,7 @@ public class ProductFieldDocumentFilter extends DocumentFilter {
         text += str;
         if(matchesType(text)) {
             super.insertString(fb, offs, str, a);
+            CreateStudentPanel.pushTextFieldUpdate(parent);
         } else {
             Toolkit.getDefaultToolkit().beep();
         }
@@ -43,6 +45,9 @@ public class ProductFieldDocumentFilter extends DocumentFilter {
     private boolean matchesType(String text) {
         boolean matches;
         switch(type) {
+            case ALPHA_SPACE:
+                matches = text.matches("^[a-zA-Z\\s]*$");
+                break;
             case NUMERIC:
                 matches = text.matches("[0-9]+");
                 break;
